@@ -1,49 +1,53 @@
 <script setup>
-import HelloWorld from './components/HelloWorld.vue'
-import TheWelcome from './components/TheWelcome.vue'
-import Todo from './components/Todo.vue';
+import {query, collection, getDocs, getDoc, doc, deleteDoc, updateDoc} from 'firebase/firestore'
+import {ref, onMounted} from 'vue'
+import db from './firebase/init'
+
+import TodoInput from './components/TodoInput.vue';
+import TodoList from './components/TodoList.vue';
+const todos = ref([])
+
+const getTodos = async () => {
+  const coll = collection(db, 'todos')
+  const querySnap = await getDocs(query(coll))
+  todos.value = []
+  querySnap.forEach((doc) => {
+    let data = doc.data()
+    data.id = doc.id
+    todos.value.push(data)
+  })
+}
+
+const toggleCompleted = async (id) => {
+  const docRef = doc(db,'todos',id)
+  const item = await getDoc(docRef)
+  const data = item.data()
+  await updateDoc(docRef, {'completed':!data.completed})
+  await getTodos()
+}
+
+const deleteTodo = async (id) => {
+  await deleteDoc(doc(db,'todos',id))
+  await getTodos()
+}
+
+onMounted(()=>{
+getTodos()
+})
+
+const updateTodo = () => {
+  getTodos()
+}
 </script>
 
 <template>
-  <header>
-    <img alt="Vue logo" class="logo" src="./assets/logo.svg" width="125" height="125" />
-
-    <div class="wrapper">
-      <HelloWorld msg="You did it!" />
-    </div>
-  </header>
-
-  <main>
-    <!-- <TheWelcome /> -->
-    <Todo />
+  <main class="m-5">
+    <h1 class="mb-2 text-2xl font-extrabold text-gray-900 dark:text-white">Todo List:</h1>
+    <TodoInput @update-todos="updateTodo"/>
+    <TodoList :todos="todos" @delete-todo="deleteTodo" @togle-completed="toggleCompleted"/>
   </main>
 </template>
 
 <style scoped>
-header {
-  line-height: 1.5;
-}
 
-.logo {
-  display: block;
-  margin: 0 auto 2rem;
-}
-
-@media (min-width: 1024px) {
-  header {
-    display: flex;
-    place-items: center;
-    padding-right: calc(var(--section-gap) / 2);
-  }
-
-  .logo {
-    margin: 0 2rem 0 0;
-  }
-
-  header .wrapper {
-    display: flex;
-    place-items: flex-start;
-    flex-wrap: wrap;
-  }
-}
 </style>
