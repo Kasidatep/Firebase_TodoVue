@@ -42,7 +42,7 @@ const updateTodo = () => {
 
 <template>
   <main class="m-5">
-    <h1 class="mb-2 text-2xl font-extrabold text-gray-900 dark:text-white">Todo List:</h1>
+    <h1 class="mb-2 px-2 text-2xl font-extrabold text-gray-900 dark:text-white">Todo List</h1>
     <TodoInput @update-todos="updateTodo"/>
     <TodoList :todos="todos" @delete-todo="deleteTodo" @togle-completed="toggleCompleted"/>
   </main>
